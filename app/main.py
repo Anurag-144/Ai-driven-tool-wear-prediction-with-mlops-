@@ -1,11 +1,26 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 import joblib
 import numpy as np
 
 app = FastAPI()
 
-# Load model
 model = joblib.load("models/xgboost_tool_wear.pkl")
+
+
+class ToolWearInput(BaseModel):
+    case: int
+    run: int
+    time: float
+    DOC: float
+    feed: float
+    material: int
+    smcAC_mean: float
+    smcDC_mean: float
+    vib_table_mean: float
+    vib_spindle_mean: float
+    AE_table_mean: float
+    AE_spindle_mean: float
 
 
 @app.get("/")
@@ -14,34 +29,21 @@ def home():
 
 
 @app.post("/predict")
-def predict(
-    case: int,
-    run: int,
-    time: float,
-    DOC: float,
-    feed: float,
-    material: int,
-    smcAC_mean: float,
-    smcDC_mean: float,
-    vib_table_mean: float,
-    vib_spindle_mean: float,
-    AE_table_mean: float,
-    AE_spindle_mean: float,
-):
+def predict(data: ToolWearInput):
 
     features = np.array([[
-        case,
-        run,
-        time,
-        DOC,
-        feed,
-        material,
-        smcAC_mean,
-        smcDC_mean,
-        vib_table_mean,
-        vib_spindle_mean,
-        AE_table_mean,
-        AE_spindle_mean
+        data.case,
+        data.run,
+        data.time,
+        data.DOC,
+        data.feed,
+        data.material,
+        data.smcAC_mean,
+        data.smcDC_mean,
+        data.vib_table_mean,
+        data.vib_spindle_mean,
+        data.AE_table_mean,
+        data.AE_spindle_mean
     ]])
 
     prediction = model.predict(features)
