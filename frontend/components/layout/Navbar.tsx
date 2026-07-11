@@ -1,46 +1,87 @@
-"use client";
+import Image from "next/image";
+import { ExternalLink } from "lucide-react";
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Activity } from "lucide-react";
+import ApiStatus from "./ApiStatus";
+
+const API_DOCS = "https://toolwear-api.onrender.com/docs";
+
+const GITHUB =
+    "https://github.com/Anurag-144/Ai-driven-tool-wear-prediction-with-mlops-";
 
 export default function Navbar() {
     return (
-        <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-white/70 backdrop-blur-xl">
-            <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-
+        <header className="sticky top-0 z-50 w-full border-b border-zinc-200/70 bg-white/80 backdrop-blur-2xl">
+            <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-6">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2">
-                    <Activity className="h-7 w-7 text-blue-600" />
-                    <span className="text-xl font-bold tracking-tight">
-                        ToolWear AI
-                    </span>
-                </Link>
+                <a
+                    href="#home"
+                    className="flex shrink-0 items-center gap-3"
+                >
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center">
+                        <Image
+                            src="/toolwear-logo.png"
+                            alt="ToolWear AI logo"
+                            width={48}
+                            height={48}
+                            priority
+                            className="h-12 w-12 object-contain"
+                        />
+                    </div>
 
-                {/* Navigation */}
-                <nav className="hidden items-center gap-8 md:flex">
-                    <Link href="#features" className="text-sm text-gray-600 hover:text-black transition">
-                        Features
-                    </Link>
+                    <div>
+                        <p className="text-xl font-bold tracking-tight text-zinc-950">
+                            ToolWear AI
+                        </p>
 
-                    <Link href="#technology" className="text-sm text-gray-600 hover:text-black transition">
-                        Technology
-                    </Link>
+                        <p className="text-sm text-zinc-500">
+                            Predictive maintenance
+                        </p>
+                    </div>
+                </a>
 
-                    <Link href="#dashboard" className="text-sm text-gray-600 hover:text-black transition">
-                        Dashboard
-                    </Link>
+                {/* Navigation links */}
+                <nav className="hidden items-center gap-8 lg:flex">
+                    <a
+                        href="#prediction"
+                        className="text-sm font-medium text-zinc-600 transition hover:text-zinc-950"
+                    >
+                        Prediction
+                    </a>
 
-                    <Link href="#faq" className="text-sm text-gray-600 hover:text-black transition">
-                        FAQ
-                    </Link>
+                    <a
+                        href={API_DOCS}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1 text-sm font-medium text-zinc-600 transition hover:text-zinc-950"
+                    >
+                        API Docs
+                        <ExternalLink size={14} />
+                    </a>
+
+                    <a
+                        href={GITHUB}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1 text-sm font-medium text-zinc-600 transition hover:text-zinc-950"
+                    >
+                        GitHub
+                        <ExternalLink size={14} />
+                    </a>
                 </nav>
 
-                {/* CTA */}
-                <Button className="rounded-full px-6">
-                    Try Demo
-                </Button>
+                {/* Right-side actions */}
+                <div className="flex shrink-0 items-center gap-3">
+                    <a
+                        href="#prediction"
+                        className="rounded-full bg-zinc-950 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-zinc-950/10 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600"
+                    >
+                        Try Demo
+                    </a>
 
+                    <div className="hidden md:block">
+                        <ApiStatus />
+                    </div>
+                </div>
             </div>
         </header>
     );
