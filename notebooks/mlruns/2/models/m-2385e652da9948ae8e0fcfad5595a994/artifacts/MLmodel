@@ -1,0 +1,22 @@
+artifact_path: file:c:/Users/anura/tool_wear_mlops/notebooks/mlruns/2/models/m-2385e652da9948ae8e0fcfad5595a994/artifacts
+flavors:
+  python_function:
+    data: model.ubj
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.12.10
+  xgboost:
+    code: null
+    data: model.ubj
+    model_class: xgboost.sklearn.XGBRegressor
+    model_format: ubj
+    xgb_version: 3.3.0
+mlflow_version: 3.14.0
+model_id: m-2385e652da9948ae8e0fcfad5595a994
+model_size_bytes: 338127
+model_uuid: m-2385e652da9948ae8e0fcfad5595a994
+prompts: null
+run_id: 3a80f4e16cee4f629357f25e3746a3c2
+utc_time_created: '2026-07-09 10:43:32.481502'
