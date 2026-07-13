@@ -24,7 +24,7 @@ export default function PredictButton({
             {loading ? (
                 <>
                     <LoaderCircle size={21} className="animate-spin" />
-                    Running XGBoost model...
+                    Requesting prediction...
                 </>
             ) : (
                 <>
@@ -32,7 +32,7 @@ export default function PredictButton({
                         size={21}
                         className="transition duration-300 group-hover:rotate-12"
                     />
-                    Run AI prediction
+                    Check tool condition
                 </>
             )}
         </motion.button>

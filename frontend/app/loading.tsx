@@ -17,11 +17,11 @@ export default function Loading() {
                 </div>
 
                 <h1 className="mt-7 text-2xl font-black tracking-tight text-zinc-950">
-                    Loading ToolWear AI
+                    Opening ToolWear AI
                 </h1>
 
                 <p className="mt-3 text-sm leading-6 text-zinc-500">
-                    Preparing the predictive-maintenance dashboard.
+                    Preparing the tool-condition workspace.
                 </p>
 
                 <div className="mt-7 h-2 w-full overflow-hidden rounded-full bg-white/60 shadow-inner">

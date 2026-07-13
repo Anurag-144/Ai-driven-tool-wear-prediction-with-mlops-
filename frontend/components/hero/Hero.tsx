@@ -1,142 +1,131 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
     Activity,
     ArrowRight,
-    BrainCircuit,
     CheckCircle2,
     Cpu,
+    Gauge,
 } from "lucide-react";
 
 export default function Hero() {
     return (
         <section
-            id="home"
-            className="page-noise relative w-full scroll-mt-20 overflow-hidden bg-[#f6f4ef]"
+            id="top"
+            className="page-noise relative overflow-hidden bg-[#f6f4ef] pt-28 sm:pt-32"
         >
             <div className="pointer-events-none absolute -left-40 top-20 h-[460px] w-[460px] rounded-full bg-blue-300/30 blur-[120px]" />
             <div className="pointer-events-none absolute -right-48 bottom-0 h-[520px] w-[520px] rounded-full bg-violet-300/25 blur-[140px]" />
 
-            <div className="relative mx-auto grid min-h-[760px] max-w-7xl items-center gap-14 px-6 py-24 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="relative mx-auto grid min-h-[760px] max-w-7xl items-center gap-14 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[1.05fr_0.95fr]">
                 <motion.div
-                    initial={{ opacity: 0, y: 36 }}
+                    initial={{ opacity: 0, y: 28 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.75, ease: "easeOut" }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
                 >
                     <div className="glass-panel-soft inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-zinc-800">
-                        <BrainCircuit size={17} />
-                        AI-driven predictive maintenance
+                        <Gauge size={17} aria-hidden="true" />
+                        A clearer view of cutting-tool condition
                     </div>
 
-                    <h1 className="mt-8 max-w-3xl text-5xl font-black leading-[1.02] tracking-[-0.04em] text-zinc-950 md:text-7xl">
-                        Predict tool wear before production stops.
+                    <h1 className="mt-8 max-w-4xl text-5xl font-black leading-[0.98] tracking-[-0.05em] text-zinc-950 sm:text-6xl md:text-7xl">
+                        Understand cutting-tool condition before it interrupts production.
                     </h1>
 
-                    <p className="mt-7 max-w-2xl text-lg leading-8 text-zinc-600 md:text-xl">
-                        Analyze machining conditions and sensor signals with an XGBoost
-                        model to estimate cutting-tool wear before it causes downtime.
+                    <p className="mt-7 max-w-2xl text-lg leading-8 text-zinc-700 md:text-xl">
+                        Enter the machining setup and current sensor measurements.
+                        ToolWear AI sends them to the deployed model and returns a
+                        plain-language wear estimate for review.
                     </p>
 
-                    <div className="mt-10 flex flex-wrap gap-4">
-                        <a
-                            href="#prediction"
-                            className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-7 py-4 font-semibold text-white shadow-xl shadow-zinc-950/15 transition duration-300 hover:-translate-y-1 hover:bg-blue-600 hover:shadow-blue-600/25"
+                    <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                        <Link
+                            href="/dashboard"
+                            className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-zinc-950 px-7 font-bold text-white shadow-xl shadow-zinc-950/15 transition hover:-translate-y-1 hover:bg-blue-700"
                         >
-                            Start prediction
-                            <ArrowRight size={18} />
-                        </a>
-
+                            Open prediction dashboard
+                            <ArrowRight size={18} aria-hidden="true" />
+                        </Link>
                         <a
                             href="#how-it-works"
-                            className="glass-panel-soft inline-flex items-center gap-2 rounded-full px-7 py-4 font-semibold text-zinc-900 transition duration-300 hover:-translate-y-1 hover:bg-white/70"
+                            className="glass-panel-soft inline-flex min-h-14 items-center justify-center rounded-full px-7 font-bold text-zinc-900 transition hover:-translate-y-1 hover:bg-white/75"
                         >
                             See how it works
                         </a>
                     </div>
 
-                    <div className="mt-10 flex flex-wrap gap-x-8 gap-y-4 text-sm text-zinc-600">
-                        <TrustItem text="XGBoost model" />
-                        <TrustItem text="FastAPI backend" />
-                        <TrustItem text="Real-time prediction" />
+                    <div className="mt-9 flex flex-wrap gap-x-7 gap-y-3 text-sm text-zinc-600">
+                        <TrustItem text="Simple guided inputs" />
+                        <TrustItem text="Live FastAPI request" />
+                        <TrustItem text="Saved local history" />
                     </div>
                 </motion.div>
 
                 <motion.div
-                    initial={{ opacity: 0, y: 42, scale: 0.98 }}
+                    initial={{ opacity: 0, y: 36, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 0.85, delay: 0.12, ease: "easeOut" }}
+                    transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
                     className="relative"
                 >
-                    <div className="glass-panel rounded-[36px] p-4">
-                        <div className="rounded-[28px] border border-white/60 bg-white/45 p-8 backdrop-blur-2xl">
-                            <div className="flex items-center justify-between gap-5">
+                    <div className="glass-panel rounded-[36px] p-3 sm:p-4">
+                        <div className="rounded-[28px] border border-white/60 bg-white/45 p-5 backdrop-blur-2xl sm:p-8">
+                            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                                 <div>
                                     <p className="text-sm font-medium text-zinc-500">
-                                        Prediction system
+                                        Dashboard preview
                                     </p>
-                                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-zinc-950">
-                                        Tool health analysis
+                                    <h2 className="mt-1 text-2xl font-black tracking-tight text-zinc-950">
+                                        Tool condition overview
                                     </h2>
                                 </div>
-
-                                <span className="rounded-full border border-emerald-200/70 bg-emerald-50/70 px-3 py-1.5 text-xs font-semibold text-emerald-700 backdrop-blur-xl">
-                                    API connected
+                                <span className="w-fit rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1.5 text-xs font-bold text-blue-800">
+                                    Illustrative sample
                                 </span>
                             </div>
 
-                            <div className="mt-8 grid grid-cols-2 gap-4">
-                                <FeatureCard
-                                    icon={<Cpu size={23} />}
-                                    title="Machine data"
-                                    text="Case, run, time, DOC and feed"
+                            <div className="mt-7 grid gap-4 sm:grid-cols-2">
+                                <PreviewFeature
+                                    icon={<Cpu size={22} />}
+                                    title="Machining setup"
+                                    text="Cutting time, depth, feed, case, run, and material"
                                 />
-
-                                <FeatureCard
-                                    icon={<Activity size={23} />}
-                                    title="Sensor data"
-                                    text="Current, vibration and acoustic signals"
+                                <PreviewFeature
+                                    icon={<Activity size={22} />}
+                                    title="Sensor profile"
+                                    text="Normalized current, vibration, and acoustic inputs"
                                 />
                             </div>
 
-                            <div className="glass-panel-dark mt-6 rounded-[28px] p-7 text-white">
-                                <div className="flex items-center justify-between gap-4">
-                                    <span className="text-sm text-zinc-400">
-                                        Sample prediction
+                            <div className="glass-panel-dark mt-5 rounded-[26px] p-6 text-white sm:p-7">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <span className="text-sm text-zinc-300">
+                                        Illustrative result - not live data
                                     </span>
-
-                                    <span className="rounded-full bg-amber-400/15 px-3 py-1.5 text-xs font-semibold text-amber-300">
+                                    <span className="rounded-full bg-amber-400/15 px-3 py-1.5 text-xs font-bold text-amber-200">
                                         Medium wear
                                     </span>
                                 </div>
-
                                 <div className="mt-5 flex items-end gap-2">
-                                    <span className="text-6xl font-black tracking-[-0.05em]">
+                                    <span className="text-5xl font-black tracking-[-0.05em] sm:text-6xl">
                                         0.2595
                                     </span>
                                     <span className="pb-2 text-zinc-400">VB</span>
                                 </div>
-
-                                <div className="mt-7">
-                                    <div className="mb-2 flex items-center justify-between text-xs text-zinc-400">
-                                        <span>Relative wear level</span>
-                                        <span>52%</span>
-                                    </div>
-
-                                    <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "52%" }}
-                                            transition={{ duration: 1, delay: 0.6 }}
-                                            className="h-full rounded-full bg-amber-400"
-                                        />
-                                    </div>
-                                </div>
-
-                                <p className="mt-5 text-sm leading-6 text-zinc-400">
-                                    This sample shows how the live workspace converts model output
-                                    into a practical maintenance recommendation.
+                                <p className="mt-5 text-sm leading-6 text-zinc-300">
+                                    A real result appears only after the dashboard receives a
+                                    successful API response.
                                 </p>
+                                <div className="mt-6 grid grid-cols-6 items-end gap-2" aria-hidden="true">
+                                    {[42, 58, 36, 70, 52, 63].map((height, index) => (
+                                        <div
+                                            key={index}
+                                            className="rounded-t-md bg-blue-400/70"
+                                            style={{ height: `${height}px` }}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -149,13 +138,13 @@ export default function Hero() {
 function TrustItem({ text }: { text: string }) {
     return (
         <div className="flex items-center gap-2">
-            <CheckCircle2 size={17} className="text-emerald-500" />
+            <CheckCircle2 size={17} className="text-emerald-600" aria-hidden="true" />
             {text}
         </div>
     );
 }
 
-function FeatureCard({
+function PreviewFeature({
     icon,
     title,
     text,
@@ -166,12 +155,11 @@ function FeatureCard({
 }) {
     return (
         <div className="glass-panel-soft rounded-2xl p-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100/80 text-blue-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100/80 text-blue-700" aria-hidden="true">
                 {icon}
             </div>
-
             <h3 className="mt-4 font-bold text-zinc-950">{title}</h3>
-            <p className="mt-2 text-sm leading-6 text-zinc-500">{text}</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-600">{text}</p>
         </div>
     );
 }

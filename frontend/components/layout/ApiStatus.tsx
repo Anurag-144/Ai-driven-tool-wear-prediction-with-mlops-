@@ -9,7 +9,9 @@ import {
 
 import { RefreshCw } from "lucide-react";
 
-const API_URL = "https://toolwear-api.onrender.com";
+const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ??
+    "https://toolwear-api.onrender.com";
 
 type ApiState = "checking" | "online" | "offline";
 
@@ -114,6 +116,7 @@ export default function ApiStatus() {
             type="button"
             onClick={handleManualCheck}
             title="Check API status again"
+            aria-label={`${current.text}. Check API status again.`}
             className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition hover:opacity-80 ${current.wrapper}`}
         >
             <span className="relative flex h-2.5 w-2.5">

@@ -1,40 +1,59 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+export async function generateMetadata(): Promise<Metadata> {
+    const requestHeaders = await headers();
+    const host =
+        requestHeaders.get("x-forwarded-host") ??
+        requestHeaders.get("host") ??
+        "localhost:3000";
+    const protocol =
+        requestHeaders.get("x-forwarded-proto") ??
+        (host.startsWith("localhost") ? "http" : "https");
+    const metadataBase = new URL(`${protocol}://${host}`);
+    const title = "ToolWear AI | Cutting-Tool Condition";
+    const description =
+        "A plain-language interface for reviewing cutting-tool wear estimates from machining and sensor inputs.";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "ToolWear AI | Predictive Maintenance",
-  description:
-    "AI-driven cutting-tool wear prediction using XGBoost, FastAPI and machining sensor data.",
-};
-
-interface RootLayoutProps {
-  children: ReactNode;
+    return {
+        metadataBase,
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            type: "website",
+            images: [
+                {
+                    url: "/og.png",
+                    width: 1733,
+                    height: 909,
+                    alt: "ToolWear AI cutting-tool condition dashboard",
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: ["/og.png"],
+        },
+    };
 }
 
-export default function RootLayout({
-  children,
-}: RootLayoutProps) {
-  return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable}`}
-    >
-      <body className="min-h-screen w-full overflow-x-hidden bg-white text-zinc-950 antialiased">
-        {children}
-      </body>
-    </html>
-  );
+interface RootLayoutProps {
+    children: ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
+    return (
+        <html lang="en">
+            <body className="min-h-screen w-full overflow-x-hidden bg-[#f6f4ef] text-zinc-950 antialiased">
+                {children}
+            </body>
+        </html>
+    );
 }

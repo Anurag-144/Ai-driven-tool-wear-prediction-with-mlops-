@@ -11,6 +11,8 @@ import {
     Wrench,
 } from "lucide-react";
 
+import { getWearStatus, type WearBandKey } from "@/lib/wear-status";
+
 interface PredictionCardProps {
     prediction: number | null;
     loading: boolean;
@@ -18,50 +20,11 @@ interface PredictionCardProps {
 
 const DISPLAY_MAX_WEAR = 0.5;
 
-function getWearStatus(value: number) {
-    if (value < 0.2) {
-        return {
-            title: "Healthy Tool",
-            level: "Low wear",
-            description:
-                "The predicted wear is low. The tool can continue operating under the current machining conditions.",
-            recommendation:
-                "Continue machining and follow the normal inspection schedule.",
-            badgeClass: "bg-emerald-100/85 text-emerald-700",
-            iconClass: "bg-emerald-100 text-emerald-600",
-            strokeClass: "stroke-emerald-500",
-            Icon: CheckCircle2,
-        };
-    }
-
-    if (value < 0.35) {
-        return {
-            title: "Monitor Tool",
-            level: "Medium wear",
-            description:
-                "The tool shows a moderate level of wear. Continue operation carefully and monitor the sensor readings.",
-            recommendation:
-                "Schedule an inspection and monitor vibration and acoustic signals.",
-            badgeClass: "bg-amber-100/85 text-amber-700",
-            iconClass: "bg-amber-100 text-amber-600",
-            strokeClass: "stroke-amber-500",
-            Icon: AlertTriangle,
-        };
-    }
-
-    return {
-        title: "Maintenance Required",
-        level: "High wear",
-        description:
-            "The predicted wear is high. Continuing operation may affect machining quality or increase failure risk.",
-        recommendation:
-            "Inspect the cutting tool and consider replacing it before the next run.",
-        badgeClass: "bg-red-100/85 text-red-700",
-        iconClass: "bg-red-100 text-red-600",
-        strokeClass: "stroke-red-500",
-        Icon: ShieldAlert,
-    };
-}
+const statusIcons = {
+    low: CheckCircle2,
+    medium: AlertTriangle,
+    high: ShieldAlert,
+} satisfies Record<WearBandKey, typeof CheckCircle2>;
 
 export default function PredictionCard({
     prediction,
@@ -76,32 +39,25 @@ export default function PredictionCard({
             );
 
     return (
-        <motion.aside
-            initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.55 }}
-            className="glass-panel overflow-hidden rounded-[34px]"
-        >
-            <div className="border-b border-white/50 px-8 py-7">
+        <aside className="glass-panel h-auto overflow-hidden rounded-[30px]">
+            <div className="border-b border-white/50 p-6">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <p className="text-sm font-semibold text-blue-600">
-                            AI model output
+                        <p className="text-sm font-semibold text-blue-700">
+                            Model output
                         </p>
-
                         <h2 className="mt-1 text-3xl font-black tracking-[-0.03em] text-zinc-950">
-                            Tool wear analysis
+                            Tool wear result
                         </h2>
                     </div>
 
-                    <div className="glass-panel-soft flex h-14 w-14 items-center justify-center rounded-2xl text-blue-600">
-                        <Gauge size={26} />
+                    <div className="glass-panel-soft flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-blue-700">
+                        <Gauge size={23} aria-hidden="true" />
                     </div>
                 </div>
             </div>
 
-            <div className="p-8">
+            <div className="p-6 md:p-7">
                 <AnimatePresence mode="wait">
                     {loading ? (
                         <LoadingState />
@@ -123,7 +79,7 @@ export default function PredictionCard({
                     )}
                 </AnimatePresence>
             </div>
-        </motion.aside>
+        </aside>
     );
 }
 
@@ -134,37 +90,22 @@ function LoadingState() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex min-h-[480px] flex-col items-center justify-center text-center"
+            className="flex flex-col items-center justify-center py-10 text-center"
         >
             <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="glass-panel-soft flex h-20 w-20 items-center justify-center rounded-3xl text-blue-600"
+                className="glass-panel-soft flex h-20 w-20 items-center justify-center rounded-3xl text-blue-700"
             >
-                <LoaderCircle size={36} />
+                <LoaderCircle size={36} aria-hidden="true" />
             </motion.div>
 
             <h3 className="mt-7 text-2xl font-black text-zinc-950">
                 Running prediction
             </h3>
-
-            <p className="mt-3 max-w-sm text-sm leading-6 text-zinc-500">
-                Sending machining and sensor measurements to the deployed XGBoost
-                model.
+            <p className="mt-3 max-w-sm text-sm leading-6 text-zinc-600">
+                Sending the twelve current inputs to the deployed FastAPI service.
             </p>
-
-            <div className="mt-8 h-2.5 w-full max-w-xs overflow-hidden rounded-full bg-white/60 shadow-inner">
-                <motion.div
-                    initial={{ x: "-100%" }}
-                    animate={{ x: "300%" }}
-                    transition={{
-                        duration: 1.3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                    }}
-                    className="h-full w-1/3 rounded-full bg-blue-600"
-                />
-            </div>
         </motion.div>
     );
 }
@@ -176,23 +117,22 @@ function EmptyState() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex min-h-[480px] flex-col items-center justify-center text-center"
+            className="flex flex-col items-center justify-center py-8 text-center"
         >
             <div className="glass-panel-soft flex h-20 w-20 items-center justify-center rounded-3xl text-zinc-600">
-                <Activity size={34} />
+                <Activity size={34} aria-hidden="true" />
             </div>
-
             <h3 className="mt-7 text-2xl font-black text-zinc-950">
-                Ready for prediction
+                Ready for a prediction
             </h3>
-
-            <p className="mt-3 max-w-sm text-sm leading-6 text-zinc-500">
-                Configure the machine and sensor inputs, then run the AI model.
+            <p className="mt-3 max-w-sm text-sm leading-6 text-zinc-600">
+                Review the machining setup and normalized sensor measurements,
+                then send them to the model.
             </p>
 
-            <div className="mt-8 grid w-full grid-cols-2 gap-3">
-                <InfoBox label="Model" value="XGBoost" />
-                <InfoBox label="Features" value="12 inputs" />
+            <div className="mt-8 w-full rounded-2xl border border-blue-200/70 bg-blue-50/70 p-4 text-left text-xs leading-5 text-blue-900">
+                Low, medium, and high are dashboard interpretation bands. They
+                are not model confidence scores.
             </div>
         </motion.div>
     );
@@ -206,67 +146,35 @@ function PredictionResult({
     percentage: number;
 }) {
     const status = getWearStatus(prediction);
-    const StatusIcon = status.Icon;
+    const StatusIcon = statusIcons[status.key];
 
     return (
         <div>
-            <motion.div
-                initial={{
-                    opacity: 0,
-                    y: -12,
-                    scale: 0.97,
-                }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                }}
-                transition={{
-                    duration: 0.4,
-                    ease: "easeOut",
-                }}
-                className="mb-7 flex items-center gap-3 rounded-2xl border border-emerald-200/70 bg-emerald-50/70 px-4 py-3 text-emerald-800 shadow-sm backdrop-blur-xl"
-            >
-                <motion.div
-                    initial={{ scale: 0, rotate: -30 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{
-                        type: "spring",
-                        stiffness: 260,
-                        damping: 16,
-                        delay: 0.1,
-                    }}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"
-                >
-                    <CheckCircle2 size={20} />
-                </motion.div>
-
+            <div className="mb-7 flex items-center gap-3 rounded-2xl border border-emerald-200/70 bg-emerald-50/70 px-4 py-3 text-emerald-900 shadow-sm backdrop-blur-xl">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                    <CheckCircle2 size={20} aria-hidden="true" />
+                </div>
                 <div>
-                    <p className="text-sm font-bold">
-                        Prediction completed
-                    </p>
-
-                    <p className="text-xs text-emerald-700">
-                        The XGBoost model returned a valid tool-wear result.
+                    <p className="text-sm font-bold">Prediction completed</p>
+                    <p className="text-xs text-emerald-800">
+                        A valid wear estimate was returned by the API.
                     </p>
                 </div>
-            </motion.div>
-            <div className="grid grid-cols-[minmax(0,1fr)_112px] items-center gap-3">
+            </div>
+
+            <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-[minmax(0,1fr)_128px]">
                 <div className="min-w-0">
-                    <p className="text-sm font-medium text-zinc-500">
+                    <p className="text-sm font-medium text-zinc-600">
                         Predicted tool wear
                     </p>
-
                     <div className="mt-2 flex flex-wrap items-end gap-2">
-                        <span className="text-5xl font-black tracking-[-0.05em] text-zinc-950">
+                        <span className="break-all text-5xl font-black tracking-[-0.05em] text-zinc-950">
                             {prediction.toFixed(4)}
                         </span>
-
                         <span className="pb-1 text-base font-medium text-zinc-500">
                             VB
                         </span>
                     </div>
-
                     <span
                         className={`mt-4 inline-flex rounded-full px-3 py-1.5 text-xs font-bold shadow-sm ${status.badgeClass}`}
                     >
@@ -285,44 +193,43 @@ function PredictionResult({
                     <div
                         className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${status.iconClass}`}
                     >
-                        <StatusIcon size={23} />
+                        <StatusIcon size={23} aria-hidden="true" />
                     </div>
-
                     <div>
-                        <h3 className="font-bold text-zinc-950">
-                            {status.title}
-                        </h3>
-
-                        <p className="mt-2 text-sm leading-6 text-zinc-600">
-                            {status.description}
+                        <h3 className="font-bold text-zinc-950">{status.title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-zinc-700">
+                            {status.summary}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-blue-200/60 bg-blue-50/65 p-5 backdrop-blur-xl">
+            <div className="mt-4 rounded-2xl border border-blue-200/70 bg-blue-50/70 p-5">
                 <div className="flex items-start gap-3">
                     <Wrench
                         size={21}
-                        className="mt-0.5 shrink-0 text-blue-600"
+                        aria-hidden="true"
+                        className="mt-0.5 shrink-0 text-blue-700"
                     />
-
                     <div>
                         <p className="text-sm font-bold text-blue-950">
-                            Recommended action
+                            Recommended next step
                         </p>
-
-                        <p className="mt-1 text-sm leading-6 text-blue-800">
+                        <p className="mt-1 text-sm leading-6 text-blue-900">
                             {status.recommendation}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
-                <InfoBox label="Model" value="XGBoost" />
-                <InfoBox label="API status" value="Connected" />
-            </div>
+            <p className="mt-5 text-xs leading-5 text-zinc-600">
+                This result is a model estimate and should be combined with
+                physical inspection and established maintenance procedures.
+            </p>
+            <p className="mt-2 text-xs leading-5 text-zinc-500">
+                The circular gauge is a display scale, not a confidence score.
+                Status bands: below 0.20 low, below 0.35 medium, otherwise high.
+            </p>
         </div>
     );
 }
@@ -336,21 +243,19 @@ function CircularGauge({
 }) {
     const radius = 45;
     const circumference = 2 * Math.PI * radius;
-    const offset =
-        circumference - (percentage / 100) * circumference;
+    const offset = circumference - (percentage / 100) * circumference;
 
     return (
-        <div className="relative h-28 w-28 shrink-0">
+        <div className="relative mx-auto h-32 w-32 shrink-0" aria-hidden="true">
             <svg viewBox="0 0 110 110" className="h-full w-full">
                 <circle
                     cx="55"
                     cy="55"
                     r={radius}
                     fill="none"
-                    stroke="rgba(255,255,255,0.7)"
+                    stroke="rgba(255,255,255,0.75)"
                     strokeWidth="9"
                 />
-
                 <motion.circle
                     cx="55"
                     cy="55"
@@ -363,10 +268,7 @@ function CircularGauge({
                     strokeDasharray={circumference}
                     initial={{ strokeDashoffset: circumference }}
                     animate={{ strokeDashoffset: offset }}
-                    transition={{
-                        duration: 0.9,
-                        ease: "easeOut",
-                    }}
+                    transition={{ duration: 0.9, ease: "easeOut" }}
                 />
             </svg>
 
@@ -374,28 +276,8 @@ function CircularGauge({
                 <span className="text-2xl font-black text-zinc-950">
                     {percentage.toFixed(0)}%
                 </span>
-
-                <span className="text-[10px] font-medium text-zinc-500">
-                    relative wear
-                </span>
+                <span className="text-xs font-medium text-zinc-500">display scale</span>
             </div>
-        </div>
-    );
-}
-function InfoBox({
-    label,
-    value,
-}: {
-    label: string;
-    value: string;
-}) {
-    return (
-        <div className="glass-panel-soft rounded-2xl p-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
-                {label}
-            </p>
-
-            <p className="mt-1 font-bold text-zinc-900">{value}</p>
         </div>
     );
 }

@@ -14,7 +14,15 @@ export interface PredictionRequest {
 }
 
 export interface PredictionResponse {
-    prediction: number;
-    confidence?: number;
-    risk?: "Low" | "Medium" | "High";
+    "Predicted Tool Wear (VB)": number;
 }
+
+export type WearStatus = "Low wear" | "Medium wear" | "High wear";
+
+export type PredictionHistoryEntry = {
+    id: string;
+    timestamp: string;
+    prediction: number;
+    status: WearStatus;
+    inputs: PredictionRequest;
+};
