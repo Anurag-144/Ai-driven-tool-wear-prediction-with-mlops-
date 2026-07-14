@@ -38,7 +38,7 @@ reports/*
 # Processed datasets
 data/processed/*
 !data/processed/.gitkeep
-
+!data/processed/reference.csv
 # Temporary files
 tmp/
 

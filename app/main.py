@@ -7,7 +7,6 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Annotated, Any
 
 import joblib
@@ -16,9 +15,15 @@ from fastapi import FastAPI, Header, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.common.config import FEATURES, PREDICTION_COLUMN, RuntimeSettings, classify_wear
+from src.common.config import (
+    FEATURES,
+    PREDICTION_COLUMN,
+    RuntimeSettings,
+    classify_wear,
+)
 from src.common.metadata import load_model_metadata, load_safe_json
 from src.monitoring.database import PredictionDatabase
+from src.monitoring.drift import generate_drift_report
 from src.monitoring.metrics import (
     latency_series,
     monitoring_summary,
@@ -31,7 +36,10 @@ logger = logging.getLogger("toolwear.api")
 
 
 class ToolWearInput(BaseModel):
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    model_config = ConfigDict(
+        extra="forbid",
+        allow_inf_nan=False,
+    )
 
     case: int
     run: int
@@ -48,9 +56,39 @@ class ToolWearInput(BaseModel):
 
 
 class ActualWearFeedback(BaseModel):
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    model_config = ConfigDict(
+        extra="forbid",
+        allow_inf_nan=False,
+    )
 
     actual_wear: float = Field(ge=0)
+
+
+def validate_admin_token(
+    *,
+    configured_token: str | None,
+    supplied_token: str | None,
+) -> None:
+    """
+    Validate the monitoring administrator token.
+
+    Protected monitoring operations are disabled when no token has been
+    configured in the environment.
+    """
+    if not configured_token:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="MLOPS_ADMIN_TOKEN is not configured.",
+        )
+
+    if not supplied_token or not hmac.compare_digest(
+        configured_token,
+        supplied_token,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="A valid monitoring admin token is required.",
+        )
 
 
 def create_app(
@@ -60,16 +98,24 @@ def create_app(
     model_override: Any | None = None,
 ) -> FastAPI:
     settings = settings_override or RuntimeSettings.from_environment()
-    database = database_override or PredictionDatabase(settings.database_url)
+
+    database = database_override or PredictionDatabase(
+        settings.database_url
+    )
 
     loaded_model = model_override
     model_load_error: str | None = None
+
     if loaded_model is None:
         try:
-            loaded_model = joblib.load(settings.production_model_path)
+            loaded_model = joblib.load(
+                settings.production_model_path
+            )
         except Exception as error:
             model_load_error = type(error).__name__
-            logger.exception("Failed to load the production model")
+            logger.exception(
+                "Failed to load the production model"
+            )
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
@@ -78,7 +124,10 @@ def create_app(
             application.state.database_initialized = True
         except Exception:
             application.state.database_initialized = False
-            logger.exception("Prediction database initialization failed")
+            logger.exception(
+                "Prediction database initialization failed"
+            )
+
         yield
 
     application = FastAPI(
@@ -86,6 +135,7 @@ def create_app(
         version="2.0.0",
         lifespan=lifespan,
     )
+
     application.state.settings = settings
     application.state.database = database
     application.state.database_initialized = False
@@ -107,33 +157,58 @@ def create_app(
 
     @application.get("/")
     def home() -> dict[str, str]:
-        return {"message": "Tool Wear Prediction API is running"}
+        return {
+            "message": "Tool Wear Prediction API is running"
+        }
 
     @application.get("/health")
     def health() -> dict[str, Any]:
-        metadata = load_model_metadata(settings.model_metadata_path)
+        metadata = load_model_metadata(
+            settings.model_metadata_path
+        )
+
         return {
-            "status": "ok" if application.state.model is not None else "degraded",
+            "status": (
+                "ok"
+                if application.state.model is not None
+                else "degraded"
+            ),
             "model_loaded": application.state.model is not None,
             "database_connected": database.is_connected(),
             "model_version": metadata.get("model_version"),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(
+                timezone.utc
+            ).isoformat(),
         }
 
     @application.get("/model-info")
     def model_info() -> dict[str, Any]:
-        return load_model_metadata(settings.model_metadata_path)
+        return load_model_metadata(
+            settings.model_metadata_path
+        )
 
     @application.post("/predict")
-    def predict(data: ToolWearInput, response: Response) -> dict[str, float]:
+    def predict(
+        data: ToolWearInput,
+        response: Response,
+    ) -> dict[str, float]:
         request_id = str(uuid.uuid4())
+
         response.headers["X-Request-ID"] = request_id
+
         feature_values = data.model_dump()
-        metadata = load_model_metadata(settings.model_metadata_path)
+
+        metadata = load_model_metadata(
+            settings.model_metadata_path
+        )
+
         started = time.perf_counter()
 
         if application.state.model is None:
-            latency_ms = (time.perf_counter() - started) * 1000
+            latency_ms = (
+                time.perf_counter() - started
+            ) * 1000
+
             _log_prediction_safely(
                 database=database,
                 request_id=request_id,
@@ -143,8 +218,12 @@ def create_app(
                 latency_ms=latency_ms,
                 request_success=False,
                 model_metadata=metadata,
-                error_type=application.state.model_load_error or "ModelUnavailable",
+                error_type=(
+                    application.state.model_load_error
+                    or "ModelUnavailable"
+                ),
             )
+
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="The prediction model is unavailable.",
@@ -152,14 +231,31 @@ def create_app(
 
         try:
             feature_array = np.array(
-                [[feature_values[feature] for feature in FEATURES]], dtype=float
+                [
+                    [
+                        feature_values[feature]
+                        for feature in FEATURES
+                    ]
+                ],
+                dtype=float,
             )
+
             prediction = float(
-                application.state.model.predict(feature_array)[0])
+                application.state.model.predict(
+                    feature_array
+                )[0]
+            )
+
             if not math.isfinite(prediction):
-                raise ValueError("The model returned a non-finite prediction.")
+                raise ValueError(
+                    "The model returned a non-finite prediction."
+                )
+
         except Exception as error:
-            latency_ms = (time.perf_counter() - started) * 1000
+            latency_ms = (
+                time.perf_counter() - started
+            ) * 1000
+
             _log_prediction_safely(
                 database=database,
                 request_id=request_id,
@@ -171,15 +267,23 @@ def create_app(
                 model_metadata=metadata,
                 error_type=type(error).__name__,
             )
+
             logger.exception(
-                "Model inference failed for request %s", request_id)
+                "Model inference failed for request %s",
+                request_id,
+            )
+
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Prediction failed.",
             ) from error
 
-        latency_ms = (time.perf_counter() - started) * 1000
+        latency_ms = (
+            time.perf_counter() - started
+        ) * 1000
+
         wear_status = classify_wear(prediction)
+
         _log_prediction_safely(
             database=database,
             request_id=request_id,
@@ -190,7 +294,11 @@ def create_app(
             request_success=True,
             model_metadata=metadata,
         )
-        return {PREDICTION_COLUMN: prediction}
+
+        # Keep the existing prediction API contract unchanged.
+        return {
+            PREDICTION_COLUMN: prediction
+        }
 
     @application.get("/monitoring/summary")
     def summary() -> dict[str, Any]:
@@ -200,7 +308,9 @@ def create_app(
     def latency() -> dict[str, Any]:
         return latency_series(database)
 
-    @application.get("/monitoring/prediction-distribution")
+    @application.get(
+        "/monitoring/prediction-distribution"
+    )
     def distribution() -> dict[str, Any]:
         return prediction_distribution(database)
 
@@ -212,13 +322,85 @@ def create_app(
                 "status": "insufficient_data",
                 "generated_at": None,
                 "current_sample_count": 0,
+                "reference_sample_count": None,
                 "minimum_current_samples": None,
                 "dataset_drift_detected": None,
                 "drifted_feature_count": None,
+                "drifted_feature_share": None,
+                "prediction_drift_detected": None,
                 "features": [],
-                "message": "No drift report has been generated.",
+                "performance": {
+                    "status": "unavailable",
+                    "message": (
+                        "Actual wear labels are required "
+                        "for performance drift monitoring."
+                    ),
+                },
+                "message": (
+                    "No drift report has been generated."
+                ),
             },
         )
+
+    @application.post("/monitoring/drift/run")
+    def run_drift_report(
+        admin_token: Annotated[
+            str | None,
+            Header(alias="X-Admin-Token"),
+        ] = None,
+    ) -> dict[str, Any]:
+        validate_admin_token(
+            configured_token=settings.admin_token,
+            supplied_token=admin_token,
+        )
+
+        if not database.is_connected():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The prediction database is unavailable.",
+            )
+
+        try:
+            return generate_drift_report(database)
+
+        except FileNotFoundError as error:
+            logger.exception(
+                "A required drift-monitoring file is missing"
+            )
+
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=(
+                    "Drift report generation failed because "
+                    "a required reference file is missing."
+                ),
+            ) from error
+
+        except ImportError as error:
+            logger.exception(
+                "A drift-monitoring dependency is unavailable"
+            )
+
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=(
+                    "Drift report generation failed because "
+                    "a required dependency is unavailable."
+                ),
+            ) from error
+
+        except Exception as error:
+            logger.exception(
+                "Drift report generation failed"
+            )
+
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=(
+                    "Drift report generation failed: "
+                    f"{type(error).__name__}"
+                ),
+            ) from error
 
     @application.get("/monitoring/lifecycle")
     def lifecycle() -> dict[str, Any]:
@@ -247,29 +429,34 @@ def create_app(
             },
         )
 
-    @application.post("/monitoring/feedback/{prediction_id}")
+    @application.post(
+        "/monitoring/feedback/{prediction_id}"
+    )
     def feedback(
         prediction_id: int,
         feedback_data: ActualWearFeedback,
-        admin_token: Annotated[str | None, Header(
-            alias="X-Admin-Token")] = None,
+        admin_token: Annotated[
+            str | None,
+            Header(alias="X-Admin-Token"),
+        ] = None,
     ) -> dict[str, Any]:
-        if settings.admin_token and not (
-            admin_token
-            and hmac.compare_digest(settings.admin_token, admin_token)
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="A valid monitoring admin token is required.",
-            )
-        updated = update_feedback(
-            database, prediction_id, feedback_data.actual_wear
+        validate_admin_token(
+            configured_token=settings.admin_token,
+            supplied_token=admin_token,
         )
+
+        updated = update_feedback(
+            database,
+            prediction_id,
+            feedback_data.actual_wear,
+        )
+
         if updated is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Prediction record not found.",
             )
+
         return updated
 
     return application
@@ -298,9 +485,11 @@ def _log_prediction_safely(
             model_metadata=model_metadata,
             error_type=error_type,
         )
+
     except Exception:
         logger.exception(
-            "Prediction logging failed for request %s; inference response is preserved",
+            "Prediction logging failed for request %s; "
+            "inference response is preserved",
             request_id,
         )
 

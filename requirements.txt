@@ -9,3 +9,5 @@ python-dotenv==1.2.2
 PyYAML==6.0.3
 SQLAlchemy==2.0.51
 psycopg[binary]==3.3.4
+pandas==2.3.2
+evidently==0.7.21
