@@ -1,6 +1,6 @@
 {
-  "artifact_hash": "1b972adc8abfe2ac4c76884e473bb52b5c82f597408dd088443c34efeec064ee",
-  "dataset_hash": null,
+  "artifact_hash": "c37a710f3f33b55a975b9e5a9adb59ffea5b43eab1eb7c62b62f422122155367",
+  "dataset_hash": "71486a857939d1416c86c7cf0c469d5e69c7c30495e01ec8a0e13aafd2a313cb",
   "features": [
     "case",
     "run",
@@ -15,10 +15,14 @@
     "AE_table_mean",
     "AE_spindle_mean"
   ],
-  "metrics": {},
-  "mlflow_run_id": null,
+  "metrics": {
+    "mae": 0.0877609604721268,
+    "rmse": 0.11556159180727076,
+    "r2": 0.5933539711763152
+  },
+  "mlflow_run_id": "6eca2c3c2294406b8cf44dd4ff8b9e14",
   "model_name": "xgboost_tool_wear",
-  "model_version": null,
-  "status": "legacy_production",
-  "trained_at": null
+  "model_version": "v4",
+  "status": "production",
+  "trained_at": "2026-07-14T08:01:42.577000Z"
 }
