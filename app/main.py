@@ -94,8 +94,12 @@ def create_app(
 
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
+        allow_origins=[
+            "http://localhost:3000",
+            "https://ai-driven-tool-wear-prediction-with.vercel.app",
+        ],
+        allow_origin_regex=r"https://.*\.vercel\.app",
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
         expose_headers=["X-Request-ID"],
@@ -150,7 +154,8 @@ def create_app(
             feature_array = np.array(
                 [[feature_values[feature] for feature in FEATURES]], dtype=float
             )
-            prediction = float(application.state.model.predict(feature_array)[0])
+            prediction = float(
+                application.state.model.predict(feature_array)[0])
             if not math.isfinite(prediction):
                 raise ValueError("The model returned a non-finite prediction.")
         except Exception as error:
@@ -166,7 +171,8 @@ def create_app(
                 model_metadata=metadata,
                 error_type=type(error).__name__,
             )
-            logger.exception("Model inference failed for request %s", request_id)
+            logger.exception(
+                "Model inference failed for request %s", request_id)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Prediction failed.",
@@ -245,7 +251,8 @@ def create_app(
     def feedback(
         prediction_id: int,
         feedback_data: ActualWearFeedback,
-        admin_token: Annotated[str | None, Header(alias="X-Admin-Token")] = None,
+        admin_token: Annotated[str | None, Header(
+            alias="X-Admin-Token")] = None,
     ) -> dict[str, Any]:
         if settings.admin_token and not (
             admin_token
