@@ -9,7 +9,10 @@ notebooks/
 mlruns/
 mlartifacts/
 reports/
-artifacts/
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/pipeline_status.json
+!artifacts/lifecycle_status.json
 data/processed/
 frontend/node_modules/
 frontend/.next/
