@@ -21,19 +21,21 @@ mlflow.db
 *.db
 data/predictions.db
 
-# DVC generated caches
+# DVC cache
 .dvc/cache/
 .dvc-site-cache/
 
-# Generated models and training artifacts
+# Generated model and training artifacts
 artifacts/*
 !artifacts/.gitkeep
+!artifacts/pipeline_status.json
+!artifacts/lifecycle_status.json
 
-# Generated evaluation and drift reports
+# Generated reports
 reports/*
 !reports/.gitkeep
 
-# Generated processed datasets
+# Processed datasets
 data/processed/*
 !data/processed/.gitkeep
 
@@ -47,6 +49,6 @@ frontend/out/
 frontend/.env.local
 frontend/.npm-cache/
 
-# Operating-system files
-.DS_Store
-Thumbs.db
+
+# Backup files
+*.bak
