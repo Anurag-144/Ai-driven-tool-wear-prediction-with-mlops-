@@ -2,19 +2,19 @@ import type { Metadata } from "next";
 
 import Footer from "@/components/footer/Footer";
 import DashboardNavbar from "@/components/layout/DashboardNavbar";
-import PredictionWorkspace from "@/components/prediction/PredictionWorkspace";
+import MlopsDashboard from "@/components/mlops/MlopsDashboard";
 
 export const metadata: Metadata = {
-    title: "Prediction Dashboard | ToolWear AI",
+    title: "MLOps Operations | ToolWear AI",
     description:
-        "Enter machining and normalized sensor inputs to request a cutting-tool wear estimate.",
+        "Review real ToolWear AI model metadata, service monitoring, drift, and lifecycle state.",
 };
 
-export default function DashboardPage() {
+export default function MlopsPage() {
     return (
         <main id="top" className="min-h-screen w-full overflow-x-hidden bg-[#f3f1ec]">
-            <DashboardNavbar current="dashboard" />
-            <PredictionWorkspace />
+            <DashboardNavbar current="mlops" />
+            <MlopsDashboard />
             <Footer />
         </main>
     );

@@ -1,0 +1,146 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python -m src.data.prepare --params params.yaml
+    deps:
+    - path: data/mill.mat
+      hash: md5
+      md5: b8b9e4c1311c791f4494dd2c05f7e9f3
+      size: 72575144
+    - path: src/common/config.py
+      hash: md5
+      md5: 929efbfddd3327e37e9952a676a61777
+      size: 3108
+    - path: src/common/paths.py
+      hash: md5
+      md5: 93363d2989e6fc5b18a8ebc668186c2c
+      size: 808
+    - path: src/data/prepare.py
+      hash: md5
+      md5: cc42fa6bca6b18bb95fadefc71f92bba
+      size: 5321
+    - path: src/data/validate.py
+      hash: md5
+      md5: 8e73cf039f807c387c75e3f414949345
+      size: 1405
+    params:
+      params.yaml:
+        data.random_seed: 42
+        data.source: data/mill.mat
+        data.target: VB
+        data.test_size: 0.2
+    outs:
+    - path: artifacts/data_metadata.json
+      hash: md5
+      md5: 0431356e59ea82610c55e157b78d297a
+      size: 506
+    - path: data/processed/reference.csv
+      hash: md5
+      md5: 9023fdbea1bf7cb3c05c75a07478af52
+      size: 20884
+    - path: data/processed/test.csv
+      hash: md5
+      md5: c96530bc2590bc1ede6cee9829570fb7
+      size: 4392
+    - path: data/processed/train.csv
+      hash: md5
+      md5: caf9886de0b147bcb4835f71610ca888
+      size: 16612
+  train:
+    cmd: python -m src.training.train --params params.yaml
+    deps:
+    - path: artifacts/data_metadata.json
+      hash: md5
+      md5: 0431356e59ea82610c55e157b78d297a
+      size: 506
+    - path: data/processed/train.csv
+      hash: md5
+      md5: caf9886de0b147bcb4835f71610ca888
+      size: 16612
+    - path: src/training/registry.py
+      hash: md5
+      md5: 993e58cdb58d61f47f354798b18a5338
+      size: 2640
+    - path: src/training/train.py
+      hash: md5
+      md5: 808a8a62d86304a8addf7406be6e598e
+      size: 6506
+    params:
+      params.yaml:
+        model.name: tool-wear-regressor
+        model.parameters:
+          n_estimators: 200
+          learning_rate: 0.05
+          max_depth: 5
+          random_state: 42
+          objective: reg:squarederror
+          n_jobs: 1
+        model.type: XGBRegressor
+    outs:
+    - path: artifacts/candidate_model.pkl
+      hash: md5
+      md5: fbf342ea489e5bdf42fe2853f3d576a1
+      size: 347144
+    - path: artifacts/training_run.json
+      hash: md5
+      md5: b901de0a76cf7dfcd4464b122b1415d1
+      size: 452
+  evaluate:
+    cmd: python -m src.training.evaluate --params params.yaml
+    deps:
+    - path: artifacts/candidate_model.pkl
+      hash: md5
+      md5: fbf342ea489e5bdf42fe2853f3d576a1
+      size: 347144
+    - path: artifacts/training_run.json
+      hash: md5
+      md5: b901de0a76cf7dfcd4464b122b1415d1
+      size: 452
+    - path: data/processed/test.csv
+      hash: md5
+      md5: c96530bc2590bc1ede6cee9829570fb7
+      size: 4392
+    - path: src/training/evaluate.py
+      hash: md5
+      md5: 3120b47721432eca3f17427786fcb66a
+      size: 9540
+    - path: src/training/registry.py
+      hash: md5
+      md5: 993e58cdb58d61f47f354798b18a5338
+      size: 2640
+    params:
+      params.yaml:
+        quality_gates:
+          max_mae:
+          max_rmse:
+          min_r2:
+          require_configured: true
+    outs:
+    - path: artifacts/lifecycle_status.json
+      hash: md5
+      md5: afa3580da8bce9fcd7f56c64e8173cb3
+      size: 428
+    - path: artifacts/model_metadata.json
+      hash: md5
+      md5: bd0a425538710c0f306aa9d3a500202e
+      size: 1069
+    - path: artifacts/pipeline_status.json
+      hash: md5
+      md5: 557b1723e2d21426f6d72b0f080e0807
+      size: 186
+    - path: reports/feature_importance.png
+      hash: md5
+      md5: abbf71b18c0094846da9c9d49fbacfa0
+      size: 42105
+    - path: reports/metrics.json
+      hash: md5
+      md5: 1503ed71c97d1076ae1b04813d95c1fc
+      size: 94
+    - path: reports/prediction_vs_actual.png
+      hash: md5
+      md5: 3de082a2e3cd71b437458202141ded5c
+      size: 52290
+    - path: reports/residuals.png
+      hash: md5
+      md5: a5c179bea9d5c7387261e6e8dc6a70f7
+      size: 33647

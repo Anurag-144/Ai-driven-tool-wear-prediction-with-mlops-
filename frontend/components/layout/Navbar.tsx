@@ -15,6 +15,7 @@ const sectionLinks = [
     { href: "#benefits", label: "Benefits" },
     { href: "#how-it-works", label: "How it works" },
     { href: "#technology", label: "Technology" },
+    { href: "/mlops", label: "MLOps" },
 ];
 
 export default function Navbar() {

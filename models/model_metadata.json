@@ -1,0 +1,24 @@
+{
+  "artifact_hash": "1b972adc8abfe2ac4c76884e473bb52b5c82f597408dd088443c34efeec064ee",
+  "dataset_hash": null,
+  "features": [
+    "case",
+    "run",
+    "time",
+    "DOC",
+    "feed",
+    "material",
+    "smcAC_mean",
+    "smcDC_mean",
+    "vib_table_mean",
+    "vib_spindle_mean",
+    "AE_table_mean",
+    "AE_spindle_mean"
+  ],
+  "metrics": {},
+  "mlflow_run_id": null,
+  "model_name": "xgboost_tool_wear",
+  "model_version": null,
+  "status": "legacy_production",
+  "trained_at": null
+}

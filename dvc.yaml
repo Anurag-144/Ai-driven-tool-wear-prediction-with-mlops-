@@ -1,0 +1,54 @@
+stages:
+  prepare:
+    cmd: python -m src.data.prepare --params params.yaml
+    deps:
+      - data/mill.mat
+      - src/common/config.py
+      - src/common/paths.py
+      - src/data/prepare.py
+      - src/data/validate.py
+    params:
+      - data.source
+      - data.target
+      - data.test_size
+      - data.random_seed
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - data/processed/reference.csv
+      - artifacts/data_metadata.json
+
+  train:
+    cmd: python -m src.training.train --params params.yaml
+    deps:
+      - data/processed/train.csv
+      - artifacts/data_metadata.json
+      - src/training/train.py
+      - src/training/registry.py
+    params:
+      - model.name
+      - model.type
+      - model.parameters
+    outs:
+      - artifacts/candidate_model.pkl
+      - artifacts/training_run.json
+
+  evaluate:
+    cmd: python -m src.training.evaluate --params params.yaml
+    deps:
+      - data/processed/test.csv
+      - artifacts/candidate_model.pkl
+      - artifacts/training_run.json
+      - src/training/evaluate.py
+      - src/training/registry.py
+    params:
+      - quality_gates
+    metrics:
+      - reports/metrics.json
+    outs:
+      - reports/feature_importance.png
+      - reports/residuals.png
+      - reports/prediction_vs_actual.png
+      - artifacts/model_metadata.json
+      - artifacts/lifecycle_status.json
+      - artifacts/pipeline_status.json

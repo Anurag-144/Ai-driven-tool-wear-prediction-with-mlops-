@@ -43,6 +43,12 @@ export default function Footer() {
                             >
                                 Dashboard
                             </Link>
+                            <Link
+                                href="/mlops"
+                                className="text-sm font-semibold text-zinc-600 transition hover:text-zinc-950"
+                            >
+                                MLOps
+                            </Link>
                             <a
                                 href={GITHUB}
                                 target="_blank"

@@ -1,0 +1,36 @@
+data:
+  source: data/mill.mat
+  target: VB
+  test_size: 0.2
+  random_seed: 42
+  train_output: data/processed/train.csv
+  test_output: data/processed/test.csv
+  reference_output: data/processed/reference.csv
+
+model:
+  name: tool-wear-regressor
+  type: XGBRegressor
+  candidate_output: artifacts/candidate_model.pkl
+  production_output: models/xgboost_tool_wear.pkl
+  parameters:
+    n_estimators: 200
+    learning_rate: 0.05
+    max_depth: 5
+    random_state: 42
+    objective: reg:squarederror
+    n_jobs: 1
+
+quality_gates:
+  max_mae: null
+  max_rmse: null
+  min_r2: null
+  require_configured: true
+
+monitoring:
+  minimum_current_samples: 30
+  reference_sample_size: 146
+  current_window_size: 100
+  drift_share_threshold: 0.5
+  report_html: reports/drift/latest.html
+  report_json: reports/drift/latest.json
+  summary_json: reports/drift/latest_summary.json

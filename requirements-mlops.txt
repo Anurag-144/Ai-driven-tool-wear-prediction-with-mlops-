@@ -1,0 +1,8 @@
+-r requirements.txt
+
+pandas==2.3.2
+scipy==1.17.1
+matplotlib==3.11.0
+mlflow==3.14.0
+dvc==3.67.1
+evidently==0.7.21

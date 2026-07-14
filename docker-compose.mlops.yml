@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-toolwear}
+      POSTGRES_USER: ${POSTGRES_USER:-toolwear}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-toolwear-local-only}
+    ports:
+      - "5432:5432"
+    volumes:
+      - toolwear-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-toolwear} -d ${POSTGRES_DB:-toolwear}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: docker/mlflow/Dockerfile
+    command:
+      - mlflow
+      - server
+      - --backend-store-uri
+      - postgresql+psycopg://${POSTGRES_USER:-toolwear}:${POSTGRES_PASSWORD:-toolwear-local-only}@postgres:5432/${POSTGRES_DB:-toolwear}
+      - --default-artifact-root
+      - /mlartifacts
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - toolwear-mlartifacts:/mlartifacts
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-toolwear}:${POSTGRES_PASSWORD:-toolwear-local-only}@postgres:5432/${POSTGRES_DB:-toolwear}
+      MODEL_METADATA_PATH: models/model_metadata.json
+      PRODUCTION_MODEL_PATH: models/xgboost_tool_wear.pkl
+      MLOPS_ADMIN_TOKEN: ${MLOPS_ADMIN_TOKEN:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  toolwear-postgres:
+  toolwear-mlartifacts:

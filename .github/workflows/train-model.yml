@@ -1,0 +1,45 @@
+name: Train candidate model
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  train-candidate:
+    runs-on: ubuntu-latest
+    env:
+      MLFLOW_TRACKING_URI: sqlite:///./mlflow.db
+      MLFLOW_EXPERIMENT_NAME: tool-wear-regression
+      MLFLOW_MODEL_NAME: tool-wear-regressor
+      MLOPS_ENVIRONMENT: github-actions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-mlops.txt
+      - name: Install training dependencies
+        run: python -m pip install -r requirements-mlops.txt
+      - name: Reproduce training and evaluation
+        run: python -m dvc repro
+      - name: Show real evaluation metrics
+        run: python -m dvc metrics show
+      - name: Upload evaluation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: tool-wear-candidate-evaluation
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            reports/metrics.json
+            reports/feature_importance.png
+            reports/residuals.png
+            reports/prediction_vs_actual.png
+            artifacts/model_metadata.json
+            dvc.lock
+
+      # Promotion and deployment are intentionally excluded. An approved
+      # candidate must pass the configured quality gate and be promoted manually.
