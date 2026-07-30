@@ -52,3 +52,6 @@ frontend/.npm-cache/
 
 # Backup files
 *.bak
+data/processed/
+artifacts/lifecycle_status.json
+artifacts/pipeline_status.json
